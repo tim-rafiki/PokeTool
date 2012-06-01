@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	
+	<!--
+	appkey.xmlの構成サンプル
+	こちらを公開する
+	改変は，このファイルを参考にすること
+	-->
+	
+	<!--
+	<string name="app_key">APP_KEY</string>	
+	<string name="app_scheme">db-(APP_KEY)</string>
+	<string name="app_sec">APP_SEC</string>
+	-->
+	
+</resources>

@@ -32,8 +32,8 @@ public class PokExcelActivity extends Activity {
 	/////////////////////////////////////////////////////////
 	
 	// アプリの識別キーと認証パス
-	final static private String APP_KEY = "CHANGE_ME";
-	final static private String APP_SECRET = "CHANGE_ME_SECRET";
+	private String app_key = null;
+	private String app_sec = null;
 	
 	// アクセスタイプ（一部or全体）
 	final static private AccessType ACCESS_TYPE = AccessType.DROPBOX;
@@ -71,7 +71,11 @@ public class PokExcelActivity extends Activity {
 			//mCameraFileName = savedInstanceState.getString("mCameraFileName");
 		}
 		
-		dbc = new DropBoxController(activity, APP_KEY, APP_SECRET, ACCESS_TYPE);
+		// アプリの識別キーと認証パスを取得する
+		app_key = getString(R.string.app_key);
+		app_sec = getString(R.string.app_sec);
+		
+		dbc = new DropBoxController(activity, app_key, app_sec, ACCESS_TYPE);
 		
 		dbc.setup();
 		
@@ -102,6 +106,12 @@ public class PokExcelActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		Log.d(TAG, "onResume");
+		
+		// check session
+		if(session == null){
+			Log.d(TAG, "onResume: session = null");
+			return;
+		}
 		//AndroidAuthSession session = mApi.getSession();
 		
 		// The next part must be inserted in the onResume() method of the
