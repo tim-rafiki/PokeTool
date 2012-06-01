@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<string name="window_name">PokExcel for Android</string>
 	
-	<string name="text_none">none</string>
+	<string name="menu_option">Option</string>
+	
+	<string name="dialog_config_title">Option</string>
+	<string name="dialog_config_setDropbox">Login Dropbox</string>
+	<string name="dialog_config_logoutDropbox">Logout Dropbox</string>
+	<string name="dialog_config_setPokExcel">Set PokExcel File</string>
+	
+	<string name="dialog_logout_title">Logout Dropbox</string>
+	
+	<string name="common_ok">OK</string>
+	<string name="common_run">Run</string>
+	<string name="common_cancel">Cancel</string>
 	
 	<string name="app_name">PokExcel</string>
 	

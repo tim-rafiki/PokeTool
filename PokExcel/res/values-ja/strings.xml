@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="window_name">PokExcel for Android</string>
+	
+	<string name="menu_option">設定</string>
+	
+	<string name="dialog_config_title">設定</string>
+	<string name="dialog_config_loginDropbox">Dropboxにログイン</string>
+	<string name="dialog_config_logoutDropbox">Dropboxからログアウト</string>
+	<string name="dialog_config_setPokExcel">PokExcelファイルの指定</string>
+	
+	<string name="dialog_logout_title">Dropboxからログアウト</string>
+	
+	<string name="common_ok">了解</string>
+	<string name="common_run">実行</string>
+	<string name="common_cancel">キャンセル</string>
+	
+	<string name="app_name">PokExcel</string>
+	
+</resources>
