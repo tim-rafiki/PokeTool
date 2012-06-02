@@ -135,8 +135,8 @@ public class PokExcelActivity extends Activity {
 		if(!mLoggedIn)return;
 		
 		// PokExcelファイルを展開する
-		// デバッグ中はここはコメントアウトしておく
-		//setPokExcel();
+		// TODO デバッグ中必要に応じてコメントアウトしておく
+		setPokExcel();
 	}
 	
 	/*
@@ -343,8 +343,15 @@ public class PokExcelActivity extends Activity {
 			@Override
 			public void run() {
 				
+				// TODO 必要に応じてコメントアウトする
 				// PokExcelをダウンロードする（失敗したら処理終了）
-				if(!pullPokExcel(dbFilePath, localFilePath))return;
+				//if(!pullPokExcel(dbFilePath, localFilePath))return;
+				
+				// タイトルを元に戻す
+				setWindowTitle();
+				
+				// ダウンロード成功を3秒間表示する
+				setWindowTitle("Pull OK", 3000);
 				
 				// PokExcelを展開する
 				openPokExcel(localFilePath);
@@ -406,22 +413,17 @@ public class PokExcelActivity extends Activity {
 			return false;
 		}
 		
-		// タイトルを元に戻す
-		setWindowTitle();
-		
-		// ダウンロード成功を3秒間表示する
-		setWindowTitle("Pull OK", 3000);
-		
 		// 成功
 		return true;
 	}
 	
 	// ローカルのPokExcelファイルを展開する
 	protected void openPokExcel(String localFilePath) {
-		Log.d(TAG, "openPokExcel: localFilePath = " + localFilePath);
+		Log.d(TAG, "openPokExcel : localFilePath = " + localFilePath);
 		
+		// TODO ここ開発
 		
-		
+		Log.d(TAG, "openPokExcel : End");
 	}
 
 	// 簡易トースト
