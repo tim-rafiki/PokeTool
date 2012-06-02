@@ -14,7 +14,7 @@
 	<string name="common_ok">了解</string>
 	<string name="common_run">実行</string>
 	<string name="common_cancel">キャンセル</string>
-	
-	<string name="app_name">PokExcel</string>
+	<string name="common_error">エラー</string>
+	<string name="common_end">終了</string>
 	
 </resources>

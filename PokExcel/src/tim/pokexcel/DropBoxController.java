@@ -1,18 +1,29 @@
 package tim.pokexcel;
 
+import java.io.File;
+import java.io.OutputStream;
+import java.util.List;
+
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.ProgressListener;
+import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.android.AuthActivity;
+import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.TokenPair;
 import com.dropbox.client2.session.Session.AccessType;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
+import android.inputmethodservice.Keyboard;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -48,6 +59,8 @@ public class DropBoxController {
 	final static private String ACCESS_KEY_NAME = "ACCESS_KEY";
 	final static private String ACCESS_SECRET_NAME = "ACCESS_SECRET";
 	
+	final static int DIALOG_ID = 0;
+	
 	//////////////////
 	// ここから変数 //
 	//////////////////
@@ -57,6 +70,9 @@ public class DropBoxController {
 	
 	// Dropbox用API
 	public DropboxAPI<AndroidAuthSession> mApi;
+	
+	// ファイル選択用のダイアログ
+	private Dialog dialog = null;
 	
 	/*
 	 * クラス作成時に呼ばれる処理
@@ -217,6 +233,172 @@ public class DropBoxController {
 		edit.putString(ACCESS_KEY_NAME, key);
 		edit.putString(ACCESS_SECRET_NAME, secret);
 		edit.commit();
+	}
+	
+	/*
+	 * Dropbox内のファイルorディレクトリを指定する
+	 * action : ファイル決定してからの処理内容
+	 */
+	public void selectFilePath(final String path, final ActionSelectedFile action){
+		
+		Log.d(TAG, "selectFilePath");
+		
+		// ダイアログをいったん閉じる
+		if(dialog != null){
+			dialog.dismiss();
+		}
+		
+		Entry diEntry = null;
+		
+		// ターゲット保存用変数
+		final int[] mode = new int[1];
+		mode[0] = -1;
+		
+		// 指定したパスの情報を取得する
+		try {
+			diEntry = mApi.metadata(path, 0, null, true, null);
+			//List<Entry> fileList = diEntry.contents;
+			
+		} catch (DropboxException e) {
+			Log.e(TAG, e.toString());
+			return;
+		}
+		
+		// エントリを取得できなかった時
+		if(diEntry == null)return;
+		
+		// 指定したパスがファイルの時
+		if(!diEntry.isDir){
+			
+			Log.d(TAG , "filePath = " + path);
+			
+			// ファイルパスを指定する
+			action.filePath = path;
+			
+			// 処理を実行する
+			action.run();
+			
+			// 処理を中断する
+			return;
+		}
+		
+		List<Entry> fileList = diEntry.contents;
+		int size = fileList.size();
+		
+		// 指定したパスがディレクトリの時
+		final CharSequence[] fileNameList = new CharSequence[size];
+		
+		int i = 0;
+		for(final Entry entry : fileList){
+			fileNameList[i] = entry.fileName();
+			i++;
+		}
+		
+		// 子ファイルorディレクトリ選択用のダイアログを作成・表示する
+		dialog = new AlertDialog.Builder(activity)
+		.setTitle("path = " + path)
+		.setSingleChoiceItems(
+				fileNameList,
+				mode[0],
+				new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						mode[0] = which;
+					}
+				})
+		.setPositiveButton("go", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				
+				Log.d(TAG, "mode[0] = " + mode[0]);
+				
+				// 未選択の時，再度同じディレクトリを開く
+				if(mode[0] == -1){
+					selectFilePath(path, action);
+					return;
+				}
+				
+				// 選択したアイテム名を取得
+				String newText = fileNameList[mode[0]].toString();
+				
+				// 次に開くパス
+				String nextPath = null;
+				
+				// 元のパスがトップディレクトリの時
+				if(path.equals("/")){
+					// スラッシュなしでパスを追加する
+					nextPath = path + newText;
+				} else {
+					// スラッシュありでパスを追加する
+					nextPath = path + "/" + newText;
+				}
+				
+				// 指定した新しいパスを展開する
+				selectFilePath(nextPath, action);
+			}
+		})
+		.setNeutralButton("parent", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+
+				// 1階層上のフォルダを展開する（エラー出力なし）
+				moveUpLevelDirectory(path, null, action);
+			}
+		})
+		.setNegativeButton(R.string.common_cancel, null)
+		.create();
+		
+		dialog.show();
+	}
+	
+	/*
+	 *  フォルダ，ディレクトリ展開失敗を表示し，1つ上のディレクトリを探索する
+	 *  path   : 失敗したパス（この1階層上を再探索する）
+	 *  text   : トースト出力するテキスト
+	 *  action : ファイルが見つかった時の処理
+	 */
+	private void moveUpLevelDirectory(String path, String text, ActionSelectedFile action){
+		
+		// テキストが有効な時，展開失敗を表示する
+		if(text !=null)Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
+		
+		// トップディレクトリの時，探索を終了する
+		if(path.equals("/"))return;
+		
+		// 一つ上のディレクトリを探索する
+		selectFilePath(new File(path).getParent(), action);
+		
+		return;
+	}
+	
+	/*
+	 * 指定したパスのファイルを，ストリームにダウンロードする
+	 * path : 取得するファイルのDropbox上でのパス
+	 * rev  : 取得するファイルのリビジョン，nullのときは最新版を取得
+	 * os   : 書き込むファイルへのOutputStream
+	 * プログレスリスナーは，Log.d以外がうまくできないので外部入力しない
+	 * 戻り値 : 成功したらTrue
+	 */
+	public boolean getFile(String path, String rev, OutputStream os){
+		Log.d(TAG, "getFile");
+		
+		try {
+			mApi.getFile(path, rev, os, new ProgressListener(){
+				@Override
+				public void onProgress(long bytes, long total) {
+					Log.d(TAG, "getFile : bytes=" + bytes + ", total=" + total);
+				}
+			});
+			Log.d(TAG, "getFile : end");
+		} catch (DropboxException e) {
+			//e.printStackTrace();
+			Log.e(TAG, e.toString());
+			return false;
+		}
+		return true;
 	}
 	
 	/*

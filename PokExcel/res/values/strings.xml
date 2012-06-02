@@ -14,7 +14,12 @@
 	<string name="common_ok">OK</string>
 	<string name="common_run">Run</string>
 	<string name="common_cancel">Cancel</string>
+	<string name="common_error">Error</string>
+	<string name="common_end">End</string>
 	
 	<string name="app_name">PokExcel</string>
+	<string name="app_config_configFileName">config</string>
+	
+	<string name="app_config_PokExcelFilePath">filePath</string>
 	
 </resources>
