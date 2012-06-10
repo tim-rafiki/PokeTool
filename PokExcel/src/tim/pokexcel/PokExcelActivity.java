@@ -331,9 +331,11 @@ public class PokExcelActivity extends Activity {
 		// ファイルパスが存在しないとき，処理を中断する
 		if(dbFilePath == null)return;
 		
-		// ファイル名を取得する（アプリのローカルフォルダ）
+		// ファイル名を取得する
+		//TODO アプリのローカルフォルダ or SDカード
 		String fileName = "temp.xlsm";
-		final String localFilePath = getFilesDir() + "/" + fileName;
+		//final String localFilePath = getFilesDir() + "/" + fileName;
+		final String localFilePath = "/sdcard/" + fileName;
 		
 		// タイトルを変更する
 		setWindowTitle("pull PokExcel");
